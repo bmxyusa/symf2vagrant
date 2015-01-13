@@ -1,0 +1,15 @@
+app_user:
+    resource: "@AppBundle/Resources/config/routing/user.yml"
+    prefix:   /user
+
+app_message:
+    resource: "@AppBundle/Resources/config/routing/message.yml"
+    prefix:   /message
+
+messages:
+    pattern:  /
+    defaults: { _controller: AppBundle:Default:index }
+
+new_user:
+    pattern: /new-user
+    defaults: { _controller: AppBundle:Default:newUser }
