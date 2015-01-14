@@ -10,4 +10,12 @@ AppBundle\Entity\Message:
     fields:
         text:
             type: text
+        created:
+            type: integer
     lifecycleCallbacks: {  }
+    manyToOne:
+        user:
+            targetEntity: AppBundle\Entity\User
+            cascade: [merge, detach]
+            joinColumn:
+                nullable: false

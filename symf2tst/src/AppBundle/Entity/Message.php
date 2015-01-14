@@ -19,11 +19,25 @@ class Message
      */
     private $text;
 
+    /**
+     * @var User
+     */
+    private $user;
 
+    /**
+     * @var integer
+     */
+    private $created;
+
+    public function __construct() {
+        if (empty($this->created)) {
+            $this->created = time();
+        }
+    }
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -46,10 +60,43 @@ class Message
     /**
      * Get text
      *
-     * @return string 
+     * @return string
      */
     public function getText()
     {
         return $this->text;
     }
+
+    /**
+     * @param \AppBundle\Entity\User $user
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * @return \AppBundle\Entity\User
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param int $created
+     */
+    public function setCreated($created)
+    {
+        $this->created = $created;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCreated()
+    {
+        return $this->created;
+    }
+
 }

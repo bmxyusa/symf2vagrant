@@ -2,55 +2,128 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Message;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use AppBundle\Entity\User;
 use AppBundle\Form\NewUserType;
+use AppBundle\Form\NewMessageType;
 
-class DefaultController extends Controller {
-  public function indexAction() {
+/**
+ * Class DefaultController
+ * @package AppBundle\Controller
+ */
+class DefaultController extends Controller
+{
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function indexAction(Request $request)
+    {
 
-    $userId = $this->container->get('session')->get('userId', NULL);
+        $userId = $this->container->get('session')->get('userId', null);
 
-    if (is_null($userId)) {
-      return $this->redirect($this->generateUrl('new_user'));
+        if (is_null($userId)) {
+            return $this->redirect($this->generateUrl('new_user'));
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository('AppBundle:User')->findOneById($userId);
+
+        $message = new Message();
+        $message->setUser($user);
+
+        $form = $this->createNewMessageForm($message);
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($message);
+            $em->flush();
+        }
+
+        return $this->render(
+          'AppBundle::messages.html.twig',
+          array(
+            'user' => $user,
+            'messageForm' => $form->createView(),
+          )
+        );
     }
-    return $this->render('AppBundle::messages.html.twig');
-  }
 
-  public function newUserAction(Request $request) {
-    $form = $this->createNewUserForm();
-    $form->handleRequest($request);
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function newUserAction(Request $request)
+    {
+        $form = $this->createNewUserForm();
+        $form->handleRequest($request);
 
-    if ($form->isValid()) {
-      $name = $form->get('name')->getData();
-      $em = $this->getDoctrine()->getManager();
-      /** @var User $user */
-      $user = $em->getRepository('AppBundle:User')->findByName($name);
-      if ($user) {
-        var_dump($user->getId());
-      }
-      else {
-        $user = new User();
-        $user->setName($name);
-        $em->persist($user);
-        $em->flush();
-      }
-      //return $this->redirect($this->generateUrl('user_show', array('id' => $entity->getId())));
+        if ($form->isValid()) {
+            $name = $form->get('name')->getData();
+            $em = $this->getDoctrine()->getManager();
+            /** @var User $user */
+            $user = $em->getRepository('AppBundle:User')->findOneByName($name);
+            if ($user) {
+                $this->container->get('session')->set('userId', $user->getId());
+            } else {
+                $user = new User();
+                $user->setName($name);
+                $em->persist($user);
+                $em->flush();
+            }
+
+            return $this->redirect($this->generateUrl('messages'));
+        }
+
+        return $this->render(
+          'AppBundle:User:new-user.html.twig',
+          array(
+            'form' => $form->createView(),
+          )
+        );
     }
-    return $this->render('AppBundle:User:new-user.html.twig', array(
-      'form' => $form->createView(),
-    ));
-  }
 
-  private function createNewUserForm() {
-    $form = $this->createForm(new NewUserType(), null, array(
-      'action' => $this->generateUrl('new_user'),
-      'method' => 'POST',
-    ));
+    /**
+     * @return \Symfony\Component\Form\Form
+     */
+    private function createNewUserForm()
+    {
+        $form = $this->createForm(
+          new NewUserType(),
+          null,
+          array(
+            'action' => $this->generateUrl('new_user'),
+            'method' => 'POST',
+          )
+        );
 
-    $form->add('submit', 'submit', array('label' => 'Create'));
+        $form->add('submit', 'submit', array('label' => 'Create'));
 
-    return $form;
-  }
+        return $form;
+    }
+
+    /**
+     * @param Message $message
+     * @return \Symfony\Component\Form\Form
+     */
+    private function createNewMessageForm(Message $message)
+    {
+
+        $form = $this->createForm(
+          new NewMessageType(),
+          $message,
+          array(
+            'data_class' => 'AppBundle\Entity\Message',
+            'action' => $this->generateUrl('messages'),
+            'method' => 'POST',
+          )
+        );
+
+        $form->add('submit', 'submit', array('label' => 'Post'));
+
+        return $form;
+    }
 }

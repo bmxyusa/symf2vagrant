@@ -1,4 +1,5 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-*_*
-    {% endblock %}
+{{ form(messageForm) }}
+    You are logged as {{ user.name }}.
+{% endblock %}

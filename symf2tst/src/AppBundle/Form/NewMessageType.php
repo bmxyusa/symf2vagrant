@@ -6,7 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
-class MessageType extends AbstractType
+class NewMessageType extends AbstractType
 {
     /**
      * @param FormBuilderInterface $builder
@@ -16,7 +16,6 @@ class MessageType extends AbstractType
     {
         $builder
             ->add('text')
-            ->add('user')
         ;
     }
     
