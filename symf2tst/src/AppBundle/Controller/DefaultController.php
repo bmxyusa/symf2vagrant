@@ -31,21 +31,22 @@ class DefaultController extends Controller
         $em = $this->getDoctrine()->getManager();
         $user = $em->getRepository('AppBundle:User')->findOneById($userId);
 
-        $message = new Message();
-        $message->setUser($user);
+        $newMessage = new Message();
+        $newMessage->setUser($user);
 
-        $form = $this->createNewMessageForm($message);
+        $form = $this->createNewMessageForm($newMessage);
         $form->handleRequest($request);
 
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $em->persist($message);
+            $em->persist($newMessage);
             $em->flush();
         }
-
+        $messages = $em->getRepository('AppBundle:Message')->findBy(array(), array('created' => 'ASC'));
         return $this->render(
           'AppBundle::messages.html.twig',
           array(
+            'messages' => $messages,
             'user' => $user,
             'messageForm' => $form->createView(),
           )
@@ -66,14 +67,13 @@ class DefaultController extends Controller
             $em = $this->getDoctrine()->getManager();
             /** @var User $user */
             $user = $em->getRepository('AppBundle:User')->findOneByName($name);
-            if ($user) {
-                $this->container->get('session')->set('userId', $user->getId());
-            } else {
+            if (!$user) {
                 $user = new User();
                 $user->setName($name);
                 $em->persist($user);
                 $em->flush();
             }
+            $this->container->get('session')->set('userId', $user->getId());
 
             return $this->redirect($this->generateUrl('messages'));
         }
