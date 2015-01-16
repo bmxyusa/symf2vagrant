@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<table>
+    {% for key, month in months %}
+    <tr>
+        <td>{{ key }}</td>
+        <td>{{ month.average }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

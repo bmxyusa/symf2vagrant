@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Message;
+use Sensio\Bundle\BuzzBundle\SensioBuzzBundle;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use AppBundle\Entity\User;
@@ -43,6 +44,7 @@ class DefaultController extends Controller
             $em->flush();
         }
         $messages = $em->getRepository('AppBundle:Message')->findBy(array(), array('created' => 'ASC'));
+
         return $this->render(
           'AppBundle::messages.html.twig',
           array(
@@ -85,7 +87,31 @@ class DefaultController extends Controller
           )
         );
     }
+    public function parseAction() {
+        /** @var SensioBuzzBundle $buzz */
+        $buzz = $this->container->get('buzz');
+        /** @var \DOMDocument $response */
+        $response = $buzz->get('http://www.bank.gov.ua/control/uk/curmetal/currency/search?formType=searchPeriodForm&time_step=daily&currency=169&periodStartTime=01.01.2008&periodEndTime=01.01.2015&outer=table&execute=%D0%92%D0%B8%D0%BA%D0%BE%D0%BD%D0%B0%D1%82%D0%B8')->toDomDocument();
+        $table = $response->getElementById('results0');
+        $trs = $table->getElementsByTagName('tr');
+        $months = array();
+        foreach($trs as $tr) {
+            $tds = $tr->getElementsByTagName('td');
+            $date = $tds->item(0)->nodeValue;
+            $month = substr($date, 3);
+            if (empty($months[$month])) {
+                $months[$month] = array('sum' => 0, 'daycount' => 0, 'number' => $month);
+            }
+            $value = (float) $tds->item(3)->nodeValue;
+            $months[$month]['sum'] += $value;
+            $months[$month]['daycount']++;
+        }
+        foreach ($months as &$month) {
+            $month['average'] = (float) $month['sum'] / $month['daycount'];
+        }
 
+        return $this->render('AppBundle::parse.html.twig', array('months' => $months));
+    }
     /**
      * @return \Symfony\Component\Form\Form
      */

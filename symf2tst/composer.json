@@ -17,7 +17,9 @@
         "symfony/monolog-bundle": "~2.4",
         "sensio/distribution-bundle": "~3.0",
         "sensio/framework-extra-bundle": "~3.0",
-        "incenteev/composer-parameter-handler": "~2.0"
+        "incenteev/composer-parameter-handler": "~2.0",
+        "sensio/buzz-bundle": "dev-master",
+        "kriswallsmith/buzz": "dev-master"
     },
     "require-dev": {
         "sensio/generator-bundle": "~2.3"
@@ -44,7 +46,10 @@
         ]
     },
     "config": {
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "process-timeout":      6000,
+        "preferred-install":    "dist",
+        "github-protocols":     ["https"]
     },
     "extra": {
         "symfony-app-dir": "app",

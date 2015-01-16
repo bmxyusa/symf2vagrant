@@ -13,3 +13,7 @@ messages:
 new_user:
     pattern: /new-user
     defaults: { _controller: AppBundle:Default:newUser }
+
+parse_nbu:
+    pattern: /parse
+    defaults: { _controller: AppBundle:Default:parse }
